@@ -79,6 +79,11 @@ void phaseset() {
   /*	phase of link(i,mu) = prod(nu<mu) { -1^i[nu] }		*/
   /*	all t phases for t=nt-1 time slice get extra minus sign	*/
   /*	   to give antiperiodic boundary conditions		*/
+
+  // Use anti-periodic boundary conditions - Curtis Peterson
+  #ifdef ANTIPERIODICBC
+      node0_printf("Using fully antiperiodic boundary conditions\n");
+  #endif
   
   FORALLSITES_OMP(i,sit,default(shared)){
     sit->phase[TUP] = 1.0;
@@ -112,6 +117,20 @@ void phaseset() {
       sit->phase[TUP] = -sit->phase[TUP];
     }
     //#endif
+
+    // Use anti-periodic boundary conditions - Curtis Peterson
+    #ifdef ANTIPERIODICBC
+        if( sit->x == nx-1) {
+          sit->phase[XUP] = -sit->phase[XUP];
+	}
+	if( sit->y == ny-1) {
+          sit->phase[YUP] = -sit->phase[YUP];
+        }
+	if( sit->z == nz-1) {
+          sit->phase[ZUP] = -sit->phase[ZUP];
+        }
+    #endif
+    
   } END_LOOP_OMP
 }
 
@@ -174,7 +193,6 @@ void rephase_field_offset( su3_matrix *internal_links, int flag,
 } /* rephase_field_offset */
 
 /* conventional antiperiodic boundary conditions in Euclidean time */
-/* Do not use for long links! */
 void apply_apbc( su3_matrix *links, int r0t ){
 
   int i;

@@ -41,7 +41,6 @@ HEADERS = ${GLOBAL_HEADERS} ${MY_HEADERS} ${INLINE_HEADERS} ${SCIDAC_HEADERS}
 MY_OBJECTS= \
   control.o \
   gauge_info.o \
-  reunitarize_ks.o \
   setup.o \
   update_h.o \
   update_u.o
@@ -303,6 +302,11 @@ su3_hmc1_hisq::
 	${MAKE} -f ${MAKEFILE} target "MYTARGET= $@" ${HISQ_OPTIONS} \
 	"DEFINES += -DONEMASS -DPHI_ALGORITHM -DHMC_ALGORITHM" \
 	"EXTRA_OBJECTS += reunitarize_ks.o d_action.o update_onemass.o"
+
+su3_hmc1_hisq_apbc::
+	${MAKE} -f ${MAKEFILE} target "MYTARGET= $@" ${HISQ_OPTIONS} \
+        "DEFINES += -DONEMASS -DPHI_ALGORITHM -DHMC_ALGORITHM -DANTIPERIODICBC" \
+        "EXTRA_OBJECTS += reunitarize_ks.o d_action.o update_onemass.o"
 
 clean:
 	-/bin/rm -f *.o
