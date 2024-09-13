@@ -199,8 +199,8 @@ ifeq ($(strip ${COMPILER}),intel)
   OCFLAGS += ${ARCH_FLAG}
   OCXXFLAGS += ${ARCH_FLAG}
   LDFLAGS += ${ARCH_FLAG}
-  OCFLAGS += -parallel-source-info=2 -debug inline-debug-info -fsave-optimization-record
-  OCXXFLAGS += -parallel-source-info=2 -debug inline-debug-info -fsave-optimization-record
+  OCFLAGS += -debug
+  OCXXFLAGS += -debug
 
   ifeq ($(strip ${OMP}),true)
     OCFLAGS += -qopenmp
