@@ -203,9 +203,9 @@ ifeq ($(strip ${COMPILER}),intel)
   OCXXFLAGS += -debug
 
   ifeq ($(strip ${OMP}),true)
-    OCFLAGS += -qopenmp
-    OCXXFLAGS += -qopenmp
-    LDFLAGS += -qopenmp
+    OCFLAGS += -fopenmp
+    OCXXFLAGS += -fopenmp
+    LDFLAGS += -fopenmp
   endif
 
 endif
