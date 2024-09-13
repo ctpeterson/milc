@@ -1,0 +1,166 @@
+SU3 with improved KS action
+Microcanonical simulation with refreshing
+Hybrid Monte Carlo algorithm
+PHI algorithm
+MIMD version 56c2-dirty
+Machine = Scalar processor, with 1 nodes
+Host(0) = pop-os
+Username = curtyp
+Options selected...
+Generic double precision
+C_GLOBAL_INLINE
+DBLSTORE_FN
+D_FN_GATHER13
+FEWSUMS
+KS_MULTIFF=FNMAT
+VECLENGTH=4
+HISQ_REUNIT_ALLOW_SVD
+HISQ_REUNIT_SVD_REL_ERROR = 1e-08
+HISQ_REUNIT_SVD_ABS_ERROR = 1e-08
+HISQ_FORCE_FILTER = 5e-05
+HISQ_FF_MULTI_WRAPPER is ON
+type 0 for no prompts, 1 for prompts, or 2 for proofreading
+nflavors 4
+nx 4
+ny 4
+nz 4
+nt 4
+iseed 5440958
+LAYOUT = Hypercubes, options = with fixed input-parameter node_geometry
+ON EACH NODE (RANK) 4 x 4 x 4 x 4
+Mallocing 0.6 MBytes per node for lattice
+Made lattice
+Made nn gathers
+Made 3nn gathers
+Using fully antiperiodic boundary conditions
+Finished setup
+
+
+warms 0
+trajecs 1
+traj_between_meas 1
+beta 12.5
+mass 0
+u0 0.94645
+microcanonical_time_step 1.25e-06
+steps_per_trajectory 1
+max_cg_iterations 300
+max_cg_restarts 5
+error_per_site 5e-06
+error_for_propagator 2e-06
+npbp_reps 0
+prec_pbp 0
+fresh 
+save_serial test_lat.milc
+unit gauge configuration loaded
+CHECK PLAQ: 3.0000000000000000e+00 3.0000000000000000e+00
+CHECK NERSC LINKTR: 1.0000000000000000e+00 CKSUM: 0
+Reunitarized for double precision. Max deviation 0.00e+00 changed to 0.00e+00
+Time to check unitarity = 1.220703e-04
+"Fat 7 (level 1)"
+path coefficients: npath  path_coeff
+                    0      1.250000e-01
+                    1      -6.250000e-02
+                    2      1.562500e-02
+                    3      -2.604167e-03
+Unitarization method = UNITARIZE_ANALYTIC
+Unitarization group = U(3)
+"Fat7 + 2xLepage"
+path coefficients: npath  path_coeff
+                    0      1.000000e+00
+                    1      -4.166667e-02
+                    2      -6.250000e-02
+                    3      1.562500e-02
+                    4      -2.604167e-03
+                    5      -1.250000e-01
+"1-link + Naik"
+path coefficients: npath  path_coeff
+                    0      1.250000e-01
+                    1      -4.166667e-02
+MAKING PATH TABLES
+Calling load_fatlinks (cpu)
+Combined fattening and long-link calculation time: 0.001962
+Symanzik 1x1 + 1x2 + 1x1x1 action with HISQ quark loops
+gauge_action: total_dyn_flavors = 4
+loop coefficients: nloop rep loop_coeff  multiplicity
+                    0 0      1.000000e+00     6
+                    1 0      -4.330866e-02     12
+                    2 0      1.173519e-03     16
+WARMUPS COMPLETED
+CONGRAD5: time = 1.299381e-04 (fn D) masses = 1 iters = 3 mflops = 7.015770e+03
+ OK converged final_rsq= 3.3e-31 (cf 2.5e-11) rel = 1 (cf 0) restarts = 1 iters= 3
+PLAQUETTE ACTION: -1.920000e+04
+ACTION: g,h,f = 0.000000e+00  3.310740e+00  3.696711e+02  3.729818e+02
+DG = 0.000000e+00, DH = 3.310740e+00, DF = 3.696711e+02, D = 3.729818e+02
+Calling load_fatlinks (cpu)
+Combined fattening and long-link calculation time: 0.002785
+FLTIME: time = 5.702019e-03 (HISQ MILC D) mflops = 5.747994e+03
+CONGRAD5: time = 3.910065e-05 (fn D) masses = 1 iters = 1 mflops = 7.771534e+03
+ OK converged final_rsq= 1.1e-13 (cf 2.5e-11) rel = 1 (cf 0) restarts = 0 iters= 1
+GFTIME:   time = 6.379128e-03 (Symanzik1) mflops = 6.140185e+03
+Calling load_fatlinks (cpu)
+Combined fattening and long-link calculation time: 0.002018
+FLTIME: time = 4.467010e-03 (HISQ MILC D) mflops = 7.337159e+03
+FFTIME:  time = 8.253098e-02 (HISQ MILC D) terms = 1 flops/site = 2131578 mflops = 6.611869e+03
+Calling load_fatlinks (cpu)
+Combined fattening and long-link calculation time: 0.002027
+FLTIME: time = 4.445076e-03 (HISQ MILC D) mflops = 7.373365e+03
+CONGRAD5: time = 5.292892e-05 (fn D) masses = 1 iters = 1 mflops = 5.741133e+03
+ OK converged final_rsq= 4.3e-13 (cf 2.5e-11) rel = 1 (cf 0) restarts = 0 iters= 1
+PLAQUETTE ACTION: -1.920000e+04
+ACTION: g,h,f = 1.408737e-07  3.310753e+00  3.696711e+02  3.729818e+02
+DG = 1.408737e-07, DH = 1.358546e-05, DF = 0.000000e+00, D = 1.372633e-05
+ACCEPT: delta S = 1.372633e-05
+PLAQ:	2.9999999999747420	2.9999999999749813
+P_LOOP:	3.000000e+00	1.124513e-18
+G_LOOP:  0  0  4   	2.9999999999736233e+00	( 0 1 7 6  )
+G_LOOP:  0  1  4   	2.9999999999750067e+00	( 0 2 7 5  )
+G_LOOP:  0  2  4   	2.9999999999749645e+00	( 0 3 7 4  )
+G_LOOP:  0  3  4   	2.9999999999756009e+00	( 1 2 6 5  )
+G_LOOP:  0  4  4   	2.9999999999749152e+00	( 1 3 6 4  )
+G_LOOP:  0  5  4   	2.9999999999750653e+00	( 2 3 5 4  )
+G_LOOP:  1  0  6   	2.9999999999590057e+00	( 0 0 1 7 7 6  )
+G_LOOP:  1  1  6   	2.9999999999612470e+00	( 0 0 2 7 7 5  )
+G_LOOP:  1  2  6   	2.9999999999621525e+00	( 0 0 3 7 7 4  )
+G_LOOP:  1  3  6   	2.9999999999616671e+00	( 1 1 0 6 6 7  )
+G_LOOP:  1  4  6   	2.9999999999630385e+00	( 1 1 2 6 6 5  )
+G_LOOP:  1  5  6   	2.9999999999630935e+00	( 1 1 3 6 6 4  )
+G_LOOP:  1  6  6   	2.9999999999617324e+00	( 2 2 0 5 5 7  )
+G_LOOP:  1  7  6   	2.9999999999642122e+00	( 2 2 1 5 5 6  )
+G_LOOP:  1  8  6   	2.9999999999625624e+00	( 2 2 3 5 5 4  )
+G_LOOP:  1  9  6   	2.9999999999645479e+00	( 3 3 0 4 4 7  )
+G_LOOP:  1  10  6   	2.9999999999638760e+00	( 3 3 1 4 4 6  )
+G_LOOP:  1  11  6   	2.9999999999633444e+00	( 3 3 2 4 4 5  )
+G_LOOP:  2  0  6   	2.9999999999602975e+00	( 0 1 2 7 6 5  )
+G_LOOP:  2  1  6   	2.9999999999599183e+00	( 0 1 5 7 6 2  )
+G_LOOP:  2  2  6   	2.9999999999619833e+00	( 0 6 2 7 1 5  )
+G_LOOP:  2  3  6   	2.9999999999624216e+00	( 0 6 5 7 1 2  )
+G_LOOP:  2  4  6   	2.9999999999600711e+00	( 0 1 3 7 6 4  )
+G_LOOP:  2  5  6   	2.9999999999613496e+00	( 0 1 4 7 6 3  )
+G_LOOP:  2  6  6   	2.9999999999620162e+00	( 0 6 3 7 1 4  )
+G_LOOP:  2  7  6   	2.9999999999631326e+00	( 0 6 4 7 1 3  )
+G_LOOP:  2  8  6   	2.9999999999626419e+00	( 0 2 3 7 5 4  )
+G_LOOP:  2  9  6   	2.9999999999634763e+00	( 0 2 4 7 5 3  )
+G_LOOP:  2  10  6   	2.9999999999627787e+00	( 0 5 3 7 2 4  )
+G_LOOP:  2  11  6   	2.9999999999624132e+00	( 0 5 4 7 2 3  )
+G_LOOP:  2  12  6   	2.9999999999619535e+00	( 1 2 3 6 5 4  )
+G_LOOP:  2  13  6   	2.9999999999625109e+00	( 1 2 4 6 5 3  )
+G_LOOP:  2  14  6   	2.9999999999646745e+00	( 1 5 3 6 2 4  )
+G_LOOP:  2  15  6   	2.9999999999634515e+00	( 1 5 4 6 2 3  )
+GACTION: 1.320691e-10
+RUNNING COMPLETED
+average cg iters for step= 5.000000e+00
+Time = 1.082962e-01 seconds
+total_iters = 5
+Saved gauge configuration serially to binary file test_lat.milc
+Time stamp Fri Sep 13 10:25:06 2024
+Checksums db0c1823 9ad38c26
+Wrote info file test_lat.milc.info
+Time to save = 2.970695e-04
+CHECK PLAQ: 2.9999999999747420e+00 2.9999999999749813e+00
+CHECK NERSC LINKTR: 9.9999999999791533e-01 CKSUM: 1d7d3603
+
+
+get_i(0): EOF on input.
+exit: Fri Sep 13 10:25:06 2024
+
