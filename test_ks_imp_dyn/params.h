@@ -4,6 +4,7 @@
 #include "../include/macros.h"  /* For MAXFILENAME */
 #include "defines.h"
 #include "../include/imp_ferm_links.h"
+#include <stdint.h>
 
 /* structure for passing simulation parameters to each node */
 typedef struct {
@@ -23,7 +24,7 @@ typedef struct {
 			     Must be divisors of the node_geometry. */
 #endif
 #endif
-	int iseed;	/* for random numbers */
+	uint32_t iseed;	/* for random numbers */
 #ifdef ONEMASS
 	int nflavors;	/* the number of flavors */
 #else
