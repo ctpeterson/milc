@@ -62,17 +62,15 @@ int update(){
         update_h(0.5*epsilon);
     }
 
-    // Momentum heatbath
-    ranmom();
-
-    // Fermion heatbath
+    // First smearing
     restore_fermion_links_from_site(fn_links, MILC_PRECISION);
 	fn = get_fm_links(fn_links);
-	grsource_imp(F_OFFSET(phi), mass, EVEN, fn[0]);
+
+    // Heatbath (momentum & fermion)
+    ranmom();
+    grsource_imp(F_OFFSET(phi), mass, EVEN, fn[0]);
 
     // Calculate initial action & store field
-    restore_fermion_links_from_site(fn_links, MILC_PRECISION);
-    fn = get_fm_links(fn_links);
     iters += ks_congrad( 
         F_OFFSET(phi), F_OFFSET(xxx), mass, 
 		niter, nrestart, rsqmin, MILC_PRECISION, 
