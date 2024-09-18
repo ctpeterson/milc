@@ -38,7 +38,7 @@ void predict_next_xxx(Real *oldtime,Real *newtime,Real *nexttime){
 int update(){
     // Variables for HMC
     void predict_next_xxx(Real *oldtime,Real *newtime,Real *nexttime);
-    double startaction,endaction,dH,xrandom;
+    double startaction,endaction,d_action(),dH,xrandom;
     int step,iters = 0;
     Real final_rsq;
     Real lmbda = 0.1931833275037836;
@@ -115,10 +115,10 @@ int update(){
             #ifdef FN
 	            invalidate_fermion_links(fn_links);
             #endif
-	        node0_printf("REJECT: delta S = %e\n",-dH);
+	        node0_printf("REJECT: delta S = %e\n",dH);
         }
     }
-    else {node0_printf("ACCEPT: delta S = %e\n",-dH);}
+    else {node0_printf("ACCEPT: delta S = %e\n",dH);}
 
     // finish up
     if(steps > 0){return (iters/steps);}
