@@ -298,15 +298,28 @@ su3_hmc_hisq::
 	"DEFINES += -DPHI_ALGORITH -DHMC_ALGORITHM" \
 	"EXTRA_OBJECTS += d_action.o update.o"
 
-su3_hmc1_hisq::
+su3_hmc1_hisq_pppa::
 	${MAKE} -f ${MAKEFILE} target "MYTARGET= $@" ${HISQ_OPTIONS} \
 	"DEFINES += -DONEMASS -DPHI_ALGORITHM -DHMC_ALGORITHM" \
 	"EXTRA_OBJECTS += reunitarize_ks.o d_action.o update_onemass.o"
 
+su3_hmc1_hisq_pppa_debug::
+	${MAKE} -f ${MAKEFILE} target "MYTARGET= $@" ${HISQ_OPTIONS} \
+	"DEFINES += -DONEMASS -DPHI_ALGORITHM -DHMC_ALGORITHM \
+	-DHISQ_REUNITARIZATION_DEBUG -DHISQ_FF_DEBUG" \
+	"EXTRA_OBJECTS += reunitarize_ks.o d_action.o update_onemass.o"
+
 su3_hmc1_hisq_apbc::
 	${MAKE} -f ${MAKEFILE} target "MYTARGET= $@" ${HISQ_OPTIONS} \
-        "DEFINES += -DONEMASS -DPHI_ALGORITHM -DHMC_ALGORITHM -DANTIPERIODICBC" \
-        "EXTRA_OBJECTS += reunitarize_ks.o d_action.o update_onemass.o"
+    "DEFINES += -DONEMASS -DPHI_ALGORITHM -DHMC_ALGORITHM -DANTIPERIODICBC" \
+    "EXTRA_OBJECTS += reunitarize_ks.o d_action.o update_onemass.o"
+
+su3_hmc1_hisq_apbc_debug::
+	${MAKE} -f ${MAKEFILE} target "MYTARGET= $@" ${HISQ_OPTIONS} \
+    "DEFINES += -DONEMASS -DPHI_ALGORITHM \
+	-DHMC_ALGORITHM -DANTIPERIODICBC \
+	-DHISQ_REUNITARIZATION_DEBUG -DHISQ_FF_DEBUG" \
+    "EXTRA_OBJECTS += reunitarize_ks.o d_action.o update_onemass.o"
 
 clean:
 	-/bin/rm -f *.o
