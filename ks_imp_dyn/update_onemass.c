@@ -76,6 +76,7 @@ int update(){
     grsource_imp(F_OFFSET(phi), mass, EVEN, fn[0]);
 
     // Calculate initial action & store field
+    solve();
     startaction = d_action();
     gauge_field_copy(F_OFFSET(link[0]), F_OFFSET(old_link[0]));
 
@@ -83,9 +84,9 @@ int update(){
     for(step=1; step <= steps; step++){
         if (step == 1){update_u(lmbda*epsilon);}
         else {update_u(2.0*lmbda*epsilon);}
-        update_t(step,0.25);
+        update_t(step,0.333);
         update_u((1.0-2.0*lmbda)*epsilon);
-        update_t(step,0.5);
+        update_t(step,0.666);
         if (step == steps){update_u(lmbda*epsilon);}
     }
     reunitarize_ks();
