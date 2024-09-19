@@ -88,7 +88,6 @@ int update(){
         update_t(step,0.5);
         if (step == steps){update_u(lmbda*epsilon);}
     }
-    reunitarize_ks();
 
     // Calculate final action
     next_cg_time = steps*epsilon;
@@ -116,7 +115,10 @@ int update(){
 	        node0_printf("REJECT: delta S = %e\n",dH);
         }
     }
-    else {node0_printf("ACCEPT: delta S = %e\n",dH);}
+    else {
+        node0_printf("ACCEPT: delta S = %e\n",dH);
+        reunitarize_ks();
+    }
 
     // finish up
     if(steps > 0){return (iters/steps);}
