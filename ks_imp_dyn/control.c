@@ -1,15 +1,19 @@
-/*
+/************************* control.c *******************************/
+/* MIMD version 7 */
+/* Main procedure for SU3 with dynamical staggered fermions        */
+/* general quark action, general gauge action */
 
-Rewrite of update_onemass.c that is slightly more clear and 
-up-to-date.
+/* This version combines code for the PHI algorithm (approriate for 4
+   flavors) and the R algorithm for "epsilon squared" updating of 
+   1 to 4 flavors.  Compilation should occur with PHI_ALGORITHM defined
+   for the former and not defined for the latter.  It also contains code
+   for the hybrid Monte Carlo algorithm, for which HMC_ALGORITHM and
+   PHI_ALGORITHM should be defined.  (Actually, the
+   changes to control.c are minimal and the real differences will appear
+   in update.c */
 
-(Rewrite) author: Curtis Taylor Peterson
-
-*/
-
-// definitions files and prototypes
 #define CONTROL
-#include "ks_imp_includes.h"
+#include "ks_imp_includes.h"	/* definitions files and prototypes */
 #include "lattice_qdp.h"
 
 #ifdef HAVE_QUDA
@@ -25,109 +29,149 @@ up-to-date.
 #include "../include/io_scidac.h"
 #endif
 
-#include "../generic/generic_includes.h"
-#include "../include/openmp_defs.h"
+EXTERN gauge_header start_lat_hdr;	/* Input gauge field header */
 
-#define special_alloc malloc
-#define special_free free
-
-// Input gauge field header
-EXTERN gauge_header start_lat_hdr;
-
-int main(int argc, char**argv){
-    int meascount,traj_done;
-    int prompt,s_iters,avs_iters,avbcorr_iters;
-    double dtime, dclock();
+int
+main( int argc, char **argv )
+{
+  int meascount,traj_done;
+  int prompt;
+  int s_iters, avs_iters, avbcorr_iters;
+  double dtime, dclock();
   
-    // Function for measuring plaquette
-    void plaq(){
-        double ss_plaquette,st_plaquette;
-        su3_matrix *tempmat1,*links;
+  initialize_machine(&argc,&argv);
 
-        tempmat1 = (su3_matrix *)special_alloc(sites_on_node*sizeof(su3_matrix));
-        if(tempmat1 == NULL){
-            printf("plaq: Can't malloc temporary\n");
-            terminate(1);
-        }
-        links = create_G_from_site();
-        d_plaquette(&ss_plaquette, &st_plaquette);
-        #if (MILC_PRECISION == 1)
-            node0_printf("PLAQ:\t%f\t%f\n",-ss_plaquette,-st_plaquette);
-        #else
-            node0_printf("PLAQ:\t%.16f\t%.16f\n",-ss_plaquette,-st_plaquette);
-        #endif
-        destroy_G(links);
-        special_free(tempmat1);
-        if (this_node == 0){fflush(stdout);}
+  /* Remap standard I/O */
+  if(remap_stdio_from_args(argc, argv) == 1)terminate(1);
+  
+  g_sync();
+  /* set up */
+  prompt = setup();
+
+  /* loop over input sets */
+  while( readin(prompt) == 0) {
+    
+    /* perform warmup trajectories */
+    dtime = -dclock();
+    for( traj_done=0; traj_done < warms; traj_done++ ){
+      update();
     }
+    node0_printf("WARMUPS COMPLETED\n"); fflush(stdout);
+    
+    /* perform measuring trajectories, reunitarizing and measuring 	*/
+    meascount=0;		/* number of measurements 		*/
+    avs_iters = avbcorr_iters = 0;
+    for( traj_done=0; traj_done < trajecs; traj_done++ ){ 
+      
+      /* do the trajectories */
+      s_iters=update();
+      
+      /* measure every "propinterval" trajectories */
+      if( (traj_done%propinterval)==(propinterval-1) ){
+	
+	/* call gauge_variable fermion_variable measuring routines */
+	/* results are printed in output file */
+	rephase(OFF);
+	g_measure( );
+	rephase(ON);
 
-    // Function for measuring Polyakov loop
-    void poly(){
-        complex plp;
-        plp = ploop();
-        node0_printf("P_LOOP:\t%e\t%e\n",-plp.real,-plp.imag);
+	restore_fermion_links_from_site(fn_links, prec_pbp);
+
+	/* Measure pbp, etc */
+#ifdef ONEMASS
+	f_meas_imp( npbp_reps_in, prec_pbp, 
+		    F_OFFSET(phi),F_OFFSET(xxx),mass, 0, fn_links);
+#else
+	f_meas_imp( npbp_reps_in, prec_pbp, 
+		    F_OFFSET(phi1), F_OFFSET(xxx1), mass1, 0, fn_links);
+	f_meas_imp( npbp_reps_in, prec_pbp, 
+		    F_OFFSET(phi2), F_OFFSET(xxx2), mass2, 0, fn_links);
+#endif
+
+	/* Measure derivatives wrto chemical potential */
+#ifdef D_CHEM_POT
+#ifdef ONEMASS
+	Deriv_O6( npbp_reps_in, prec_pbp, F_OFFSET(phi1), 
+		  F_OFFSET(xxx1), F_OFFSET(xxx2), mass, fn_links);
+#else
+	Deriv_O6( npbp_reps_in, prec_pbp, F_OFFSET(phi1), 
+		  F_OFFSET(xxx1), F_OFFSET(xxx2), mass1, fn_links);
+	Deriv_O6( npbp_reps_in, prec_pbp, F_OFFSET(phi1), 
+		  F_OFFSET(xxx1), F_OFFSET(xxx2), mass2, fn_links);
+#endif
+#endif
+
+	avs_iters += s_iters;
+	++meascount;
+	fflush(stdout);
+      }
+    }	/* end loop over trajectories */
+    
+    node0_printf("RUNNING COMPLETED\n"); fflush(stdout);
+    if(meascount>0)  {
+      node0_printf("average cg iters for step= %e\n",
+		   (double)avs_iters/meascount);
     }
-
-    // Initialize simulation
-    initialize_machine(&argc,&argv);
-    if(remap_stdio_from_args(argc, argv) == 1)terminate(1);
-    g_sync();
-    prompt = setup();
-
-    // Run HMC, measure, IO
-    while(readin(prompt) == 0){
-        // Warmup loop
-        dtime = -dclock();
-        for(traj_done=0; traj_done < warms; traj_done++){update();}
-        node0_printf("WARMUPS COMPLETED\n"); fflush(stdout);
-
-        // Production loop
-        meascount = 0;
-        avs_iters = avbcorr_iters = 0;
-        for(traj_done=0; traj_done < trajecs; traj_done++){
-            // HMC update
-            s_iters = update();
-
-            // Measurements
-            if((traj_done % propinterval) == (propinterval - 1)){
-                // Gauge measurements
-                plaq(); poly();
-
-                // Fermion measurements
-                //restore_fermion_links_from_site(fn_links, prec_pbp);
-                #ifdef ONEMASS
-                    f_meas_imp( 
-                        npbp_reps_in, prec_pbp, F_OFFSET(phi),
-                        F_OFFSET(xxx), mass, 0, fn_links
-                    );
-                #else
-                    f_meas_imp( 
-                        npbp_reps_in, prec_pbp, F_OFFSET(phi1),
-                        F_OFFSET(xxx1), mass1, 0, fn_links
-                    );
-                    f_meas_imp( 
-                        npbp_reps_in, prec_pbp, F_OFFSET(phi2),
-                        F_OFFSET(xxx2), mass2, 0, fn_links
-                    );
-                #endif
-                avs_iters += s_iters;
-	            ++meascount; fflush(stdout);
-            }
-            // Cleanup & printout
-            node0_printf("RUNNING COMPLETED\n"); fflush(stdout);
-            if(meascount > 0){
-                node0_printf("average cg iters for step= %e\n",
-		        (double)avs_iters/meascount);
-            }
-            node0_printf("Time = %e seconds\n",dtime);
-            node0_printf("total_iters = %d\n",total_iters);
-        }
-        // Additional cleanup & IO
-        fflush(stdout);
-        if(saveflag != FORGET){
-            rephase(OFF);
-            save_lattice( saveflag, savefile, stringLFN );
-            rephase(ON);
-        }
+    
+    dtime += dclock();
+    if(this_node==0){
+      printf("Time = %e seconds\n",dtime);
+      printf("total_iters = %d\n",total_iters);
+#ifdef HISQ_SVD_COUNTER
+      printf("hisq_svd_counter = %d\n",hisq_svd_counter);
+#endif
+#ifdef HYPISQ_SVD_COUNTER
+      printf("hypisq_svd_counter = %d\n",hypisq_svd_counter);
+#endif
+      
+#ifdef HISQ_FORCE_FILTER_COUNTER
+      printf("hisq_force_filter_counter = %d\n",hisq_force_filter_counter);
+#endif
+#ifdef HYPISQ_FORCE_FILTER_COUNTER
+      printf("hypisq_force_filter_counter = %d\n",hypisq_force_filter_counter);
+#endif
     }
+    fflush(stdout);
+    
+    /* save lattice if requested */
+    if( saveflag != FORGET ){
+      rephase( OFF );
+      save_lattice( saveflag, savefile, stringLFN );
+      rephase( ON );
+
+    /* Destroy fermion links (created in readin() */
+
+#if FERM_ACTION == HISQ
+    destroy_fermion_links_hisq(fn_links);
+#elif FERM_ACTION == HYPISQ
+    destroy_fermion_links_hypisq(fn_links);
+#else
+    destroy_fermion_links(fn_links);
+#endif
+    fn_links = NULL;
+
+
+#ifdef HAVE_QIO
+//       save_random_state_scidac_from_site("randsave", "Dummy file XML",
+//        "Random number state", QIO_SINGLEFILE, F_OFFSET(site_prn));
+//       save_color_vector_scidac_from_site("xxx1save", "Dummy file XML",
+//        "xxx vector", QIO_SINGLEFILE, F_OFFSET(xxx1),1);
+//       save_color_vector_scidac_from_site("xxx2save", "Dummy file XML",
+//        "xxx vector", QIO_SINGLEFILE, F_OFFSET(xxx2),1);
+#endif
+
+    }
+  }
+
+#ifdef HAVE_QUDA
+  qudaFinalize();
+#endif
+
+#ifdef HAVE_QPHIX
+  /* Destroy the global mbench object */
+  destroy_qphix_env();
+#endif
+  
+  normal_exit(0);
+  return 0;
 }
