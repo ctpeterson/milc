@@ -9,6 +9,7 @@ one. Then run `make` in `ks_imp_dyn` with either `su3_hmc1_hisq_pppa`
 or `su3_hmc1_hisq_apbc` as your make target. The former will compile
 with anti-periodic boundary conditions in the time direction, while
 the latter will compile with anti-periodic boundary conditions in 
+all four directions. 
 
 milc_qcd
 ========
