@@ -20,20 +20,20 @@ ARCH ?= # epyc hsw skx clx icx spr knl pow8 pow9
 #----------------------------------------------------------------------
 # 2. Compiler family
 
-COMPILER ?= gnu # intel, ibm, cray-intel, rocm
+COMPILER = intel # intel, ibm, cray-intel, rocm
 OFFLOAD ?= # cuda hip sycl openmp
 
 #----------------------------------------------------------------------
 # 3. MPP vs Scalar
 
 # Compiling with MPI?  false for a scalar machine
-MPP ?= false
+MPP = true
 
 #----------------------------------------------------------------------
 # 4. Generic Precision 
 
 # 1 = single precision; 2 = double
-PRECISION ?= 2
+PRECISION = 2
 
 #----------------------------------------------------------------------
 # 5. Set compiler.
@@ -117,7 +117,7 @@ OPT              ?= -O3 -g
 
 # OpenMP?
 
-OMP ?= #true
+OMP = true
 
 #----------------------------------------------------------------------
 # 7. Other compiler optimization flags.  Uncomment stanza to suit.
@@ -835,7 +835,7 @@ CPROF =#
 # HISQ_SVD_COUNTER    Print summary count of SVD uses
 # HISQ_FORCE_FILTER_COUNTER Print summary count of force filter applications.
 
-CDEBUG = -DCG_OK -DREMAP_STDIO_APPEND # -DCHECK_MALLOC 
+CDEBUG = -DCG_OK -DREMAP_STDIO_APPEND -DHISQ_SVD_COUNTER -DHISQ_FORCE_FILTER_COUNTER # -DCHECK_MALLOC 
 
 #------------------------------
 # Backward compatibility
