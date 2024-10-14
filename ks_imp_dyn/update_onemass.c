@@ -21,11 +21,7 @@ int update(){
     int step,iters = 0;
     double d_action();
     double startaction,endaction,xrandom;
-    double nG = 1.0;
-    Real st1,st2;
     Real lmbda = 0.1931833275037836;
-    Real beta = 0.1;
-    Real alpha = 0.1;
     Real final_rsq;
     Real cg_time = 0.0;
     Real old_cg_time = -1.0e6;
@@ -49,26 +45,32 @@ int update(){
         update_h(dtau);
       #elif defined INT_OMELYAN
         update_h(dtau);
-      #elif defined INT_2G1F
-        update_h_fermion(dtau);
-      #elif defined INT_3G1F
-        update_h_fermion(dtau);
-      #elif defined INT_5G1F
+      #elif defined INT_OMELYAN_3G1F
         update_h_fermion(dtau);
       #endif
+    }
+
+    // Nested gauge update
+    void update_u_gauge(int step, int substep, Real dtau){
+      if (step == 1){update_u(lmbda*dtau);}
+      else {
+        if (substep == 1){update_u(2.0*lmbda*dtau);}
+        else {update_u(lmbda*dtau);}
+      }
+      update_h_gauge(0.5*dtau);
+      update_u((1.0-2.0*lmbda)*dtau);
+      update_h_gauge(0.5*dtau);
+      if (step == steps){update_u(lmbda*dtau);}
+      else {if (substep != 3){update_u(lmbda*dtau);}}
     }
 
     // Define values for first & last gauge update step (minor optimization)
     #ifdef INT_LEAPFROG
       node0_printf("using leapfrog integrator\n");
-      st1 = 0.5*epsilon; st2 = 0.5*epsilon;
     #elif defined INT_OMELYAN
       node0_printf("using 2nd-order Omelyan integrator\n");
-      st1 = lmbda*epsilon; st2 = lmbda*epsilon;
-    #elif defined INT_3G1F
-      node0_printf("using standard 3G1F integrator (MILC)\n");
-      st1 = (1.0/6.0-alpha/3.0)*epsilon;
-      st2 = (2.0-(11.0/6.0+alpha/3.0))*epsilon;
+    #elif defined INT_OMELYAN_3G1F
+      node0_printf("using \"3G1F\" nested 2nd-order Omelyan integrator\n");
     #else
       node0_printf("No integration algorithm, or unknown one\n");
       terminate(1);
@@ -93,47 +95,25 @@ int update(){
 	gauge_field_copy(F_OFFSET(link[0]), F_OFFSET(old_link[0]));
 
     // Molecular dynamics trajectory
-    #ifdef INT_LEAPFROG
-      for(step=1; step <= steps; step++){
-        if (step == 1){update_u(st1);}
-        else {update_u(st1+st2);}
+    for(step=1; step <= steps; step++){
+      #ifdef INT_LEAPFROG
+        if (step == 1){update_u(0.5*epsilon);}
+        else {update_u(epsilon);}
         update_v(step,epsilon,0.5);
-        if (step == steps){update_u(st2);}
-      }
-    #elif defined INT_OMELYAN
-      for(step=1; step <= steps; step++){
-        if (step == 1){update_u(st1);}
-        else {update_u(st1+st2);}
+        if (step == steps){update_u(0.5*epsilon);}
+      #elif defined INT_OMELYAN
+        if (step == 1){update_u(lmbda*epsilon);}
+        else {update_u(2.0*lmbda*epsilon);}
         update_v(step,0.5*epsilon,0.333);
         update_u((1.0-2.0*lmbda)*epsilon);
         update_v(step,0.5*epsilon,0.667);
-        if (step == steps){update_u(st2);}
-      }
-    #elif defined INT_3G1F // <--- MILC's default integrator for production
-      for(step=2; step <= steps; step+=2){
-        // First level
-        if (step == 2){update_u(st1);}
-        else {update_u(st1+st2);}
-	    update_h_gauge(epsilon/3.0);
-     	update_u( epsilon*( (0.5-beta)-(1.0/6.0-alpha/3.0) ) );
-	    update_v(step, epsilon, 0.333);
-     	update_u( epsilon*( (3.0/6.0+alpha/3.0)-(0.5-beta) ) );
-        update_h_gauge(epsilon/3.0);
-	    
-        // Second level
-        update_u( epsilon*( (5.0/6.0-alpha/3.0)-(3.0/6.0+alpha/3.0) ) );
-	    update_h_gauge(epsilon/3.0);
-     	update_u( epsilon*( (7.0/6.0+alpha/3.0)-(5.0/6.0-alpha/3.0) ) );
-        update_h_gauge(epsilon/3.0);
-        update_u( epsilon*( (9.0/6.0-alpha/3.0)-(7.0/6.0+alpha/3.0) ) );
-
-        // Third level
-        update_h_gauge(epsilon/3.0);
-        update_u( epsilon*( (1.5+beta)-(9.0/6.0-alpha/3.0) ) );
-        update_v(step, epsilon, 0.667);
-        update_u( epsilon*( (11.0/6.0+alpha/3.0)-(1.5+beta) ) );
-        update_h_gauge(epsilon/3.0);
-        if (step == steps){update_u(st2);}
+        if (step == steps){update_u(lmbda*epsilon);}
+      #elif defined INT_OMELYAN_3G1F
+        update_u_gauge(step,1,lmbda*epsilon); 
+        update_v(step,0.5*epsilon,0.333);
+        update_u_gauge(step,2,(1.0-2.0*lmbda)*epsilon); 
+        update_v(step,0.5*epsilon,0.667);
+        update_u_gauge(step,3,lmbda*epsilon); 
       }
     #endif
 
