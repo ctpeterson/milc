@@ -69,6 +69,10 @@ typedef struct {
 #ifdef ONEMASS
  	su3_vector phi;		/* Gaussian random source vector */
  	su3_vector xxx;		/* solution vector = Kinverse * phi */
+	#ifdef HASENBUSCH
+	  su3_vector hphi;
+	  su3_vector hxxx;
+	#endif
 #ifdef HMC_ALGORITHM
  	su3_vector old_xxx;	/* For predicting next xxx */
 #endif
@@ -152,6 +156,7 @@ EXTERN int ionode_geometry[4]; /* Specifies fixed "nsquares" for I/O
 EXTERN  params param;
 EXTERN	uint32_t iseed;		/* random number seed */
 EXTERN	int warms,trajecs,steps,niter,nrestart,propinterval;
+EXTERN  int aniter,fniter,anrestart,fnrestart;
 EXTERN  int npbp_reps_in;
 EXTERN  int prec_pbp;  /* Precisiong of pbp measurements */
 EXTERN  int dyn_flavors[MAX_DYN_MASSES]; 
@@ -165,12 +170,16 @@ EXTERN	Real epsilon;
 EXTERN  Real beta,u0;
 EXTERN  int n_dyn_masses; // number of dynamical masses
 #ifdef ONEMASS
-EXTERN  Real mass;
+	EXTERN  Real mass;
+	#ifdef HASENBUSCH
+		EXTERN Real hmass;
+	#endif
 #else
 EXTERN  Real mass1,mass2;
 #endif
 EXTERN  Real naik_term_epsilon2;
-EXTERN	Real rsqmin,rsqprop;
+EXTERN	Real arsqmin,frsqmin;
+EXTERN  Real rsqmin,rsqprop;
 EXTERN	int startflag;	/* beginning lattice: CONTINUE, RELOAD, RELOAD_BINARY,
 			   RELOAD_CHECKPOINT, FRESH */
 EXTERN	int saveflag;	/* do with lattice: FORGET, SAVE, SAVE_BINARY,

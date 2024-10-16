@@ -1,0 +1,28 @@
+prompt 0
+nflavors 4
+nx 8
+ny 8
+nz 8
+nt 8
+iseed 4563421
+
+warms 0
+trajecs 10
+traj_between_meas 1
+beta 10.0
+mass 0.0
+hasenbusch_mass 0.2
+u0 1.0
+microcanonical_time_step 0.004
+steps_per_trajectory 12
+max_cg_iterations_action 300
+max_cg_restarts_action 5
+error_per_site_action 1e-6
+max_cg_iterations_force 300
+max_cg_restarts_force 5
+error_per_site_force 1e-6
+error_for_propagator 1e-6
+npbp_reps 0
+prec_pbp 0
+reload_serial ../binary_samples/lat.sample.l8888
+forget

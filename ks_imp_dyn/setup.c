@@ -170,8 +170,18 @@ initial_set()
     show_generic_opts();
     show_generic_ks_opts();
     show_generic_ks_md_opts();
-#ifdef INT_ALG
-    node0_printf("INT_ALG=%s\n",ks_int_alg_opt_chr());
+//#ifdef INT_ALG
+//    node0_printf("INT_ALG=%s\n",ks_int_alg_opt_chr());
+//#endif
+#ifdef INT_LEAPFROG
+  node0_printf("using leapfrog integrator\n");
+#elif defined INT_OMELYAN
+  node0_printf("using 2nd-order Omelyan integrator\n");
+#elif defined INT_OMELYAN_3G1F
+  node0_printf("using \"3G1F\" nested 2nd-order Omelyan integrator\n");
+#else
+  node0_printf("No integration algorithm, or unknown one\n");
+  terminate(1);
 #endif
 #if FERM_ACTION == HISQ
     show_su3_mat_opts();
@@ -240,12 +250,12 @@ initial_set()
 #endif
   iseed=param.iseed;
 #ifdef ONEMASS
-  nflavors=param.nflavors;
+  nflavors = param.nflavors;
   nlight_flavors = nflavors;  /* In case we need it for the gauge action */
   dyn_flavors[0] = nflavors;
 #else
-  nflavors1=param.nflavors1;
-  nflavors2=param.nflavors2;
+  nflavors1 = param.nflavors1;
+  nflavors2 = param.nflavors2;
   dyn_flavors[0] = nflavors1;
   dyn_flavors[1] = nflavors2;
 #endif
@@ -305,12 +315,15 @@ readin(int prompt)
     /* beta, mass1, mass2 or mass */
     IF_OK status += get_f(stdin, prompt,"beta", &param.beta );
 #ifdef ONEMASS
-    IF_OK status += get_f(stdin, prompt,"mass", &param.mass );
+  IF_OK status += get_f(stdin, prompt,"mass",&param.mass);
+  #ifdef HASENBUSCH
+    IF_OK status += get_f(stdin, prompt,"hasenbusch_mass",&param.hmass);
+  #endif
 #else
-    IF_OK status += get_f(stdin, prompt,"mass1", &param.mass1 );
-    IF_OK status += get_f(stdin, prompt,"mass2", &param.mass2 );
+  IF_OK status += get_f(stdin, prompt,"mass1", &param.mass1 );
+  IF_OK status += get_f(stdin, prompt,"mass2", &param.mass2 );
 #if FERM_ACTION == HISQ || FERM_ACTION == HYPISQ
-    IF_OK status += get_f(stdin, prompt,"naik_term_epsilon", &param.naik_term_epsilon2 );
+  IF_OK status += get_f(stdin, prompt,"naik_term_epsilon", &param.naik_term_epsilon2 );
 #endif
 #endif
     IF_OK status += get_f(stdin, prompt,"u0", &param.u0 );
@@ -323,16 +336,27 @@ readin(int prompt)
     IF_OK status += get_i(stdin, prompt,"steps_per_trajectory", &param.steps );
     
     /* maximum no. of conjugate gradient iterations */
-    IF_OK status += get_i(stdin, prompt,"max_cg_iterations", &param.niter );
+    IF_OK status += get_i(stdin, prompt,"max_cg_iterations_action", &param.aniter );
     
     /* maximum no. of conjugate gradient restarts */
-    IF_OK status += get_i(stdin, prompt,"max_cg_restarts", &param.nrestart );
+    IF_OK status += get_i(stdin, prompt,"max_cg_restarts_action", &param.anrestart );
     
     /* error per site for conjugate gradient */
-    IF_OK status += get_f(stdin, prompt,"error_per_site", &x );
-    IF_OK param.rsqmin = x*x;   /* rsqmin is r**2 in conjugate gradient */
+    IF_OK status += get_f(stdin, prompt,"error_per_site_action", &x );
+    IF_OK param.arsqmin = x*x;   /* rsqmin is r**2 in conjugate gradient */
     /* New conjugate gradient normalizes rsqmin by norm of source */
     
+    /* maximum no. of conjugate gradient iterations */
+    IF_OK status += get_i(stdin, prompt,"max_cg_iterations_force", &param.fniter );
+    
+    /* maximum no. of conjugate gradient restarts */
+    IF_OK status += get_i(stdin, prompt,"max_cg_restarts_force", &param.fnrestart );
+    
+    /* error per site for conjugate gradient */
+    IF_OK status += get_f(stdin, prompt,"error_per_site_force", &x );
+    IF_OK param.frsqmin = x*x;   /* rsqmin is r**2 in conjugate gradient */
+    /* New conjugate gradient normalizes rsqmin by norm of source */
+
     /* error for propagator conjugate gradient */
     IF_OK status += get_f(stdin, prompt,"error_for_propagator", &x );
     IF_OK param.rsqprop = x*x;
@@ -407,17 +431,23 @@ readin(int prompt)
   trajecs = param.trajecs;
   steps = param.steps;
   propinterval = param.propinterval;
-  niter = param.niter;
-  nrestart = param.nrestart;
+  aniter = param.aniter;
+  fniter = param.fniter;
+  anrestart = param.anrestart;
+  fnrestart = param.fnrestart;
   npbp_reps_in = param.npbp_reps_in;
   prec_pbp = param.prec_pbp;
-  rsqmin = param.rsqmin;
+  arsqmin = param.arsqmin;
+  frsqmin = param.frsqmin;
   rsqprop = param.rsqprop;
   epsilon = param.epsilon;
   beta = param.beta;
 #ifdef ONEMASS
   mass = param.mass;
   n_dyn_masses = 1;
+  #ifdef HASENBUSCH
+    hmass = param.hmass;
+  #endif
 #else
   mass1 = param.mass1;
   mass2 = param.mass2;

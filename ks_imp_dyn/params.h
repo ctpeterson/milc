@@ -38,17 +38,23 @@ typedef struct {
 	Real beta;      /* gauge coupling */
 #ifdef ONEMASS
 	Real mass;      /*  quark mass */
+	#ifdef HASENBUSCH
+		Real hmass;
+	#endif
 #else
 	Real mass1,mass2; /*  quark masses */
         Real naik_term_epsilon2;   /* Naik term parameter for 2nd mass */
 #endif
 	Real u0; /* tadpole parameter */
-	int niter; 	/* maximum number of c.g. iterations */
-        int nrestart;   /* maximum number of c.g. restarts */
+	int aniter; 	/* maximum number of c.g. iterations */
+	int fniter; 	/* maximum number of c.g. iterations */
+    int anrestart;   /* maximum number of c.g. restarts */
+	int fnrestart;   /* maximum number of c.g. restarts */
         ks_eigen_param eigen_param; /* Parameters for eigensolver. Not used for HMC */
         int npbp_reps_in;   /* Number of random sources */
         int prec_pbp;       /* Precision of pbp measurements */
-	Real rsqmin,rsqprop;  /* for deciding on convergence */
+	Real rsqprop;  /* for deciding on convergence */
+	Real arsqmin,frsqmin;  /* for deciding on convergence */
 	Real epsilon;	/* time step */
         char spectrum_request[MAX_SPECTRUM_REQUEST];   /* request list for spectral measurements */
         int source_start, source_inc, n_sources; /* source time and increment */
