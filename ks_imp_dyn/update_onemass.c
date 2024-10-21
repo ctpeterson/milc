@@ -30,16 +30,19 @@ int update(){
     grsource_imp(F_OFFSET(phi), mass, EVENANDODD, fn[0]);
     iters += ks_congrad( 
       F_OFFSET(phi), F_OFFSET(xxx), hmass, 
-		  fniter, fnrestart, frsqmin, MILC_PRECISION, 
+		  aniter, anrestart, arsqmin, MILC_PRECISION, 
 		  EVENANDODD, &final_rsq, fn[0] 
     );
     dslash_site(F_OFFSET(xxx), F_OFFSET(hphi), EVEN, fn[0]);
     scalar_mult_add_latvec(
-      F_OFFSET(hphi), F_OFFSET(xxx),
+      F_OFFSET(hphi), 
+      F_OFFSET(xxx),
       2.0*hmass,
       F_OFFSET(hphi), 
       EVEN
     );
+    clear_latvec(F_OFFSET(phi), EVENANDODD);
+    clear_latvec(F_OFFSET(xxx), EVENANDODD);
     // det(H)
     grsource_imp(F_OFFSET(phi), hmass, EVEN, fn[0]);
   }
@@ -54,25 +57,25 @@ int update(){
     #endif
   }
 
-  // Fermion solve
-  void solve(){
+  // Fermion solve D = -1.714319e-03
+  void solve(int niter, int nrestart, Real rsqmin){
     #ifdef HASENBUSCH
       // det(M)/det(H)
       iters += ks_congrad( 
         F_OFFSET(hphi), F_OFFSET(hxxx), mass, 
-        aniter, anrestart, arsqmin, MILC_PRECISION, 
+        niter, nrestart, rsqmin, MILC_PRECISION, 
         EVEN, &final_rsq, fn[0] 
       );
       // det(H)
       iters += ks_congrad( 
         F_OFFSET(phi), F_OFFSET(xxx), hmass, 
-        aniter, anrestart, arsqmin, MILC_PRECISION, 
+        niter, nrestart, rsqmin, MILC_PRECISION, 
         EVEN, &final_rsq, fn[0] 
       );
     #else
       iters += ks_congrad( 
         F_OFFSET(phi), F_OFFSET(xxx), mass, 
-        aniter, anrestart, arsqmin, MILC_PRECISION, 
+        niter, nrestart, rsqmin, MILC_PRECISION, 
         EVEN, &final_rsq, fn[0] 
       );
     #endif
@@ -87,29 +90,11 @@ int update(){
   // Momentum update wrapper
   void update_v(int step, double dtau){
     // CG solve
-    smear();
+    smear(); solve(fniter,fnrestart,frsqmin);
     #ifdef HASENBUSCH
-      // det(M)/det(H)
-      iters += ks_congrad( 
-        F_OFFSET(hphi), F_OFFSET(hxxx), mass, 
-        fniter, fnrestart, frsqmin, MILC_PRECISION, 
-        EVEN, &final_rsq, fn[0] 
-      );
       dslash_site(F_OFFSET(hxxx), F_OFFSET(hxxx), ODD, fn[0]);
-      // det(H)
-      iters += ks_congrad( 
-        F_OFFSET(phi), F_OFFSET(xxx), hmass, 
-        fniter, fnrestart, frsqmin, MILC_PRECISION, 
-        EVEN, &final_rsq, fn[0] 
-      );
-    #else
-      iters += ks_congrad( 
-        F_OFFSET(phi), F_OFFSET(xxx), mass, 
-        fniter, fnrestart, frsqmin, MILC_PRECISION, 
-        EVEN, &final_rsq, fn[0] 
-      );
-    dslash_site(F_OFFSET(xxx), F_OFFSET(xxx), ODD, fn[0]);
     #endif
+    dslash_site(F_OFFSET(xxx), F_OFFSET(xxx), ODD, fn[0]);
 
     // Integrator step
     #ifdef INT_LEAPFROG
@@ -138,7 +123,9 @@ int update(){
   /* ---- Run HMC trajectory ---- */
 
   // Do heatbath & calculate initial Hamiltonian
-  smear(); heatbath(); solve(); startaction = d_action();
+  smear(); heatbath(); 
+  solve(aniter,anrestart,arsqmin); 
+  startaction = d_action();
 
   // Save backup gauge field
 	gauge_field_copy(F_OFFSET(link[0]), F_OFFSET(old_link[0]));
@@ -167,7 +154,8 @@ int update(){
   }
 
   // Calculate final Hamiltonian
-  smear(); solve(); endaction = d_action();
+  smear(); solve(aniter,anrestart,arsqmin); 
+  endaction = d_action();
 
   // Metropolis
   if(this_node==0)xrandom = myrand(&node_prn);

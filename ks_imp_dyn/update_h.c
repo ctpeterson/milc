@@ -87,12 +87,18 @@ void update_h_fermion(Real eps){
   restore_fermion_links_from_site(fn_links, MILC_PRECISION);
   #ifdef ONEMASS
     #ifdef HASENBUSCH
+      register int i;
+      register site *s;
+      Real fac = sqrt(4.0*(hmass*hmass - mass*mass));
+
+      FORALLSITES(i,s){scalar_mult_su3_vector(&(s->hxxx),fac,&(s->hxxxr));}
+
       eo_fermion_force_twoterms_site( 
         eps, 
-        (Real)(hmass*hmass - mass*mass), // det(M)/det(H)
+        ((Real)nflavors)/4., // det(M)/det(H)
 			  ((Real)nflavors)/4., // det(H)
-        F_OFFSET(xxx), // det(M)/det(H)
-			  F_OFFSET(hxxx), // det(H)
+        F_OFFSET(hxxxr), // det(M)/det(H)
+        F_OFFSET(xxx), // det(H)
         MILC_PRECISION, 
         fn_links 
       );

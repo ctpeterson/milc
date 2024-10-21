@@ -72,9 +72,10 @@ typedef struct {
 	#ifdef HASENBUSCH
 	  su3_vector hphi;
 	  su3_vector hxxx;
+	  su3_vector hxxxr;
 	#endif
 #ifdef HMC_ALGORITHM
- 	su3_vector old_xxx;	/* For predicting next xxx */
+  su3_vector old_xxx;	/* For predicting next xxx */
 #endif
 #else
  	su3_vector phi1;	/* Gaussian random source vector, mass1 */

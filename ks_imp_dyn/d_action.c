@@ -51,17 +51,15 @@ double fermion_action() {
   register complex cc;
   register complex hcc;
   double sum = 0.0;
-  double hsum = 0.0;
-  double hfac;
 
   FOREVENSITES(i,s){
     #ifdef ONEMASS
-      cc = su3_dot( &(s->phi), &(s->xxx) );
-      sum += (double)cc.real;
       #ifdef HASENBUSCH
         hcc = su3_dot( &(s->hphi), &(s->hxxx) );
-        hsum += (double)hcc.real;
+        sum += 4.0*(hmass*hmass - mass*mass)*(double)hcc.real; // det(M)/det(H)
       #endif
+      cc = su3_dot( &(s->phi), &(s->xxx) );
+      sum += (double)cc.real; // det(H)
     #else
       cc = su3_dot( &(s->phi1), &(s->xxx1) );
       sum += (double)cc.real;
@@ -69,18 +67,8 @@ double fermion_action() {
       sum += (double)cc.real;
     #endif
   }
-
   g_doublesum(&sum);
-  #ifdef ONEMASS
-    #ifdef HASENBUSCH
-      hfac = 4.0*(hmass*hmass - mass*mass);
-      g_doublesum(&hsum);
-      return(hfac*sum + hsum);
-    #else
-      return(sum);
-    #endif
-    return(sum);
-  #endif
+  return (sum);
 }
 
 /* gauge momentum contribution to the action */

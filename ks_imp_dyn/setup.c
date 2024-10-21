@@ -444,9 +444,14 @@ readin(int prompt)
   beta = param.beta;
 #ifdef ONEMASS
   mass = param.mass;
-  n_dyn_masses = 1;
   #ifdef HASENBUSCH
     hmass = param.hmass;
+  #endif
+  #ifdef HASENBUSCH
+    naik_term_epsilon2 = 0.0; //param.naik_term_epsilon2;
+    n_dyn_masses = 2;
+  #else
+    n_dyn_masses = 1;
   #endif
 #else
   mass1 = param.mass1;
@@ -457,10 +462,16 @@ readin(int prompt)
   u0 = param.u0;
 
 #ifdef ONEMASS
-  n_order_naik_total = 1;
   eps_naik[0] = 0.0;
   n_naiks = 1;
-  n_orders_naik[0] = 1;
+  #ifdef HASENBUSCH
+    eps_naik[1] = 0.0;
+    n_order_naik_total = 2;
+    n_orders_naik[0] = 2;
+  #else
+    n_order_naik_total = 1;
+    n_orders_naik[0] = 1;
+  #endif
 #else
   n_order_naik_total = 2;
   eps_naik[0] = 0.0;
