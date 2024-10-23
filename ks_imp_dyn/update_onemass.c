@@ -19,7 +19,8 @@ int update(){
   double d_action();
   double startaction,endaction,xrandom;
   Real final_rsq;
-  Real lmbda = 0.1931833275037836;
+  Real lmbda,rho,theta;
+  Real eps,last_dtau,alpha,beta;
   imp_ferm_links_t** fn;
 
   /* ---- Utility functions for HMC ---- */
@@ -88,7 +89,7 @@ int update(){
   }
 
   // Momentum update wrapper
-  void update_v(int step, double dtau){
+  void update_v(double dtau){
     // CG solve
     smear(); solve(fniter,fnrestart,frsqmin);
     #ifdef HASENBUSCH
@@ -103,22 +104,65 @@ int update(){
       update_h(dtau);
     #elif defined INT_OMELYAN_3G1F
       update_h_fermion(dtau);
+    #elif defined INT_OMELYAN_4G1F
+      update_h_fermion(dtau);
+    #elif defined INT_3G1F
+      update_h_fermion(dtau);
     #endif
   }
 
   // Nested gauge update
   void update_u_gauge(int step, int substep, Real dtau){
-    if (step == 1){update_u(lmbda*dtau);}
-    else {
-      if (substep == 1){update_u(2.0*lmbda*dtau);}
-      else {update_u(lmbda*dtau);}
-    }
-    update_h_gauge(0.5*dtau);
-    update_u((1.0-2.0*lmbda)*dtau);
-    update_h_gauge(0.5*dtau);
-    if (step == steps){update_u(lmbda*dtau);}
-    else {if (substep != 3){update_u(lmbda*dtau);}}
+    #ifdef INT_OMELYAN_3G1F
+      if (step == 1){update_u(lmbda*dtau);}
+      else {
+        if (substep == 1){update_u(2.0*lmbda*dtau);}
+        else {update_u(lmbda*dtau);}
+      }
+      update_h_gauge(0.5*dtau);
+      update_u((1.0-2.0*lmbda)*dtau);
+      update_h_gauge(0.5*dtau);
+      if (step == steps){update_u(lmbda*dtau);}
+      else {if (substep != 3){update_u(lmbda*dtau);}}
+    #elif defined INT_OMELYAN_4G1F
+      if (step == 1){update_u(rho*dtau);}
+      else {
+        if (substep == 1){update_u(2.0*rho*dtau);}
+        else {update_u(rho*dtau);} // D = 5.478893e-04
+      }
+      update_h_gauge(lmbda*dtau);
+      update_u(theta*dtau);
+      update_h_gauge((0.5 - lmbda)*dtau);
+      update_u((1.0 - 2.0*theta - 2.0*rho)*dtau);
+      update_h_gauge((0.5 - lmbda)*dtau);
+      update_u(theta*dtau);
+      update_h_gauge(lmbda*dtau);
+      if (step == steps){update_u(rho*dtau);}
+      else {if (substep != 3){update_u(rho*dtau);}}
+    #elif defined INT_3G1F
+      update_u(eps*(dtau-last_dtau));
+      last_dtau = dtau;
+    #endif
   }
+
+  #ifdef INT_OMELYAN
+    // Omelyan et. al. (2003), equation (31)
+    lmbda = 0.1931833275037836;
+  #elif defined INT_OMELYAN_3G1F
+    // Omelyan et. al. (2003), equation (31)
+    lmbda = 0.1931833275037836;
+  #elif defined INT_OMELYAN_4G1F
+    // Omelyan et. al. (2003), equation (58) and (62)
+    rho = 0.1786178958448091;
+    theta = -0.06626458266981843;
+    lmbda = 0.7123418310626056;
+  #elif defined INT_3G1F 
+    // Doug Toussaint's 3G1F in ks_imp_rhmc
+    alpha = 0.1;
+    beta = 0.1;
+    eps = epsilon/2.0;
+    last_dtau = 0.0;
+  #endif
 
   /* ---- Run HMC trajectory ---- */
 
@@ -135,21 +179,47 @@ int update(){
     #ifdef INT_LEAPFROG
       if (step == 1){update_u(0.5*epsilon);}
       else {update_u(epsilon);}
-      update_v(step,epsilon);
+      update_v(epsilon);
       if (step == steps){update_u(0.5*epsilon);}
     #elif defined INT_OMELYAN
       if (step == 1){update_u(lmbda*epsilon);}
       else {update_u(2.0*lmbda*epsilon);}
-      update_v(step,0.5*epsilon);
+      update_v(0.5*epsilon);
       update_u((1.0-2.0*lmbda)*epsilon);
-      update_v(step,0.5*epsilon);
+      update_v(0.5*epsilon);
       if (step == steps){update_u(lmbda*epsilon);}
     #elif defined INT_OMELYAN_3G1F
       update_u_gauge(step,1,lmbda*epsilon); 
-      update_v(step,0.5*epsilon);
+      update_v(0.5*epsilon);
       update_u_gauge(step,2,(1.0-2.0*lmbda)*epsilon); 
-      update_v(step,0.5*epsilon);
+      update_v(0.5*epsilon);
       update_u_gauge(step,3,lmbda*epsilon); 
+    #elif defined INT_OMELYAN_4G1F
+      update_u_gauge(step,1,lmbda*epsilon); 
+      update_v(0.5*epsilon);
+      update_u_gauge(step,2,(1.0-2.0*lmbda)*epsilon); 
+      update_v(0.5*epsilon);
+      update_u_gauge(step,3,lmbda*epsilon); 
+    #elif defined INT_3G1F
+      update_u_gauge(step, 1, 1.0/6.0-alpha/3.0);
+      update_h_gauge(eps/3.0);
+      update_u_gauge(step, 2, 1.0/2.0-beta);
+      update_v(eps);
+      update_u_gauge(step, 3, 3.0/6.0+alpha/3.0);
+      update_h_gauge(eps/3.0);
+
+      update_u_gauge(step, 4, 5.0/6.0-alpha/3.0);
+      update_h_gauge(eps/3.0);
+      update_u_gauge(step, 5, 7.0/6.0+alpha/3.0);
+      update_h_gauge(eps/3.0);
+
+      update_u_gauge(step, 6, 9.0/6.0-alpha/3.0);
+      update_h_gauge(eps/3.0);
+      update_u_gauge(step, 7, 3.0/2.0+beta);
+      update_v(eps);
+      update_u_gauge(step, 8, 11.0/6.0+alpha/3.0);
+      update_h_gauge(eps/3.0);
+      update_u_gauge(step, 9, 2.0);
     #endif
   }
 
