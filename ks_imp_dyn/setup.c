@@ -181,6 +181,8 @@ initial_set()
   node0_printf("using \"3G1F\" nested Omelyan integrator\n");
 #elif defined INT_OMELYAN_4G1F
   node0_printf("using \"4G1F\" nested Omelyan integrator\n");
+#elif defined INT_OMELYAN_5G1F
+  node0_printf("using \"5G1F\" nested Omelyan integrator\n");
 #elif defined INT_3G1F
   node0_printf("using \"3G1F\" integrator\n");
 #else

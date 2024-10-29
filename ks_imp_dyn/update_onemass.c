@@ -19,7 +19,7 @@ int update(){
   double d_action();
   double startaction,endaction,xrandom;
   Real final_rsq;
-  Real lmbda,rho,theta;
+  Real lmbda,rho,theta,vartheta;
   Real eps,last_dtau,alpha,beta;
   imp_ferm_links_t** fn;
 
@@ -106,6 +106,8 @@ int update(){
       update_h_fermion(dtau);
     #elif defined INT_OMELYAN_4G1F
       update_h_fermion(dtau);
+    #elif defined INT_OMELYAN_5G1F
+      update_h_fermion(dtau);
     #elif defined INT_3G1F
       update_h_fermion(dtau);
     #endif
@@ -128,7 +130,7 @@ int update(){
       if (step == 1){update_u(rho*dtau);}
       else {
         if (substep == 1){update_u(2.0*rho*dtau);}
-        else {update_u(rho*dtau);} // D = 5.478893e-04
+        else {update_u(rho*dtau);} 
       }
       update_h_gauge(lmbda*dtau);
       update_u(theta*dtau);
@@ -137,6 +139,23 @@ int update(){
       update_h_gauge((0.5 - lmbda)*dtau);
       update_u(theta*dtau);
       update_h_gauge(lmbda*dtau);
+      if (step == steps){update_u(rho*dtau);}
+      else {if (substep != 3){update_u(rho*dtau);}}
+    #elif defined INT_OMELYAN_5G1F
+      if (step == 1){update_u(rho*dtau);}
+      else {
+        if (substep == 1){update_u(2.0*rho*dtau);}
+        else {update_u(rho*dtau);} 
+      }
+      update_h_gauge(vartheta*dtau);
+      update_u(theta*dtau);
+      update_h_gauge(lmbda*dtau);
+      update_u((0.5 - theta - rho)*dtau);
+      update_h_gauge(2.0*(0.5 - lmbda - vartheta)*dtau);
+      update_u((0.5 - theta - rho)*dtau);
+      update_h_gauge(lmbda*dtau);
+      update_u(theta*dtau);
+      update_h_gauge(vartheta*dtau);
       if (step == steps){update_u(rho*dtau);}
       else {if (substep != 3){update_u(rho*dtau);}}
     #elif defined INT_3G1F
@@ -156,6 +175,12 @@ int update(){
     rho = 0.1786178958448091;
     theta = -0.06626458266981843;
     lmbda = 0.7123418310626056;
+  #elif defined INT_OMELYAN_5G1F
+    // Omelyan et. al. (2003)
+    rho = 0.2750081212332419;
+    theta = -0.1347950099106792;
+    vartheta = -0.08442961950707149;
+    lmbda = 0.3549000571574260;
   #elif defined INT_3G1F 
     // Doug Toussaint's 3G1F in ks_imp_rhmc
     alpha = 0.1;
@@ -195,6 +220,12 @@ int update(){
       update_v(0.5*epsilon);
       update_u_gauge(step,3,lmbda*epsilon); 
     #elif defined INT_OMELYAN_4G1F
+      update_u_gauge(step,1,lmbda*epsilon); 
+      update_v(0.5*epsilon);
+      update_u_gauge(step,2,(1.0-2.0*lmbda)*epsilon); 
+      update_v(0.5*epsilon);
+      update_u_gauge(step,3,lmbda*epsilon); 
+    #elif defined INT_OMELYAN_5G1F
       update_u_gauge(step,1,lmbda*epsilon); 
       update_v(0.5*epsilon);
       update_u_gauge(step,2,(1.0-2.0*lmbda)*epsilon); 
