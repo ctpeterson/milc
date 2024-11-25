@@ -1,0 +1,34 @@
+    prompt 0
+    nx 8
+    ny 8
+    nz 8
+    nt 8
+    iseed 4563421
+    n_pseudo 3
+    load_rhmc_params rationals.sample.su3_omelyan_rhmc
+    beta 10.0
+    n_dyn_masses 3
+    dyn_mass 0.0 0.0 0.0
+    dyn_flavors 2 1 1
+    u0  1.0
+ 
+    warms 0
+    trajecs 10
+    traj_between_meas 1
+    trajectory_length 1.0
+    outer_fermion_steps_per_trajectory 10
+    inner_gauge_steps_per_fermion_gauge_update 2
+    cgresid_md_fa_gr 1e-6 1e-6 1e-6
+    max_multicg_md_fa_gr  2500  2500  2500
+    cgprec_md_fa_gr  2 2 2
+    cgresid_md_fa_gr 1e-6 1e-6 1e-6
+    max_multicg_md_fa_gr  2500  2500  2500
+    cgprec_md_fa_gr  2 2 2
+    cgresid_md_fa_gr 1e-6 1e-6 1e-6
+    max_multicg_md_fa_gr  2500  2500  2500
+    cgprec_md_fa_gr  2 2 2
+    prec_ff 2
+    number_of_pbp_masses 0
+    reload_serial ../binary_samples/lat.sample.l8888
+    forget
+ 
