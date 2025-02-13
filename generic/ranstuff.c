@@ -25,6 +25,7 @@
 #ifdef OLD_GAUSSRAND
 
 void initialize_prn(double_prn *prn_pt, uint32_t seed, uint32_t index) {
+    //printf("IN LEGACY INITIALIZATION\n");
     /* "index" selects which random number generator - which multiplier */
     seed = (69607+8*index)*seed+12345;
     prn_pt->r0 = (seed>>8) & 0xffffff;

@@ -12,11 +12,13 @@
 #include "../include/su3.h"
 #include <stdio.h>
 
-#ifdef OLD_GAUSSRAND
+//#ifdef OLD_GAUSSRAND
 
 void random_anti_hermitian( anti_hermitmat *mat_antihermit, double_prn *prn_pt) {
 Real r3,r8;
 Real sqrt_third;
+
+	//printf("YES LEGACY\n");
 
 	sqrt_third = sqrt( (double)(1.0/3.0) );
         r3=gaussian_rand_no(prn_pt);
@@ -30,14 +32,43 @@ Real sqrt_third;
 	mat_antihermit->m01.imag=gaussian_rand_no(prn_pt);
 	mat_antihermit->m02.imag=gaussian_rand_no(prn_pt);
 	mat_antihermit->m12.imag=gaussian_rand_no(prn_pt);
+	
+	
+	//if (this_node == 0)
+	//{
+	/*
+	printf(
+	  "%0.17lf %0.17lf %0.17lf %0.17lf %0.17lf %0.17lf \n",
+	  mat_antihermit->m01.real,
+	  mat_antihermit->m02.real,
+	  mat_antihermit->m12.real,
+	  mat_antihermit->m01.imag,
+	  mat_antihermit->m02.imag,
+	  mat_antihermit->m12.imag
+	);
+	*/
+	/*
+	printf("%0.17lf %0.17lf \n", mat_antihermit->m01.real,mat_antihermit->m01.imag);
+	printf("%0.17lf %0.17lf \n", -mat_antihermit->m01.real,mat_antihermit->m01.imag);
+	printf("%0.17lf %0.17lf \n", mat_antihermit->m02.real,mat_antihermit->m02.imag);
+	printf("%0.17lf %0.17lf \n", -mat_antihermit->m02.real,mat_antihermit->m02.imag);
+	printf("%0.17lf %0.17lf \n", mat_antihermit->m12.real,mat_antihermit->m12.imag);
+	printf("%0.17lf %0.17lf \n", -mat_antihermit->m12.real,mat_antihermit->m12.imag);
+	//}
+	exit(0);
+	*/
+	
 
 }/*random_anti_hermitian_*/
 
+/*
 #else
 
 void random_anti_hermitian( anti_hermitmat *mat_antihermit, double_prn *prn_pt) {
 complex r38;
 Real sqrt_third;
+
+	//printf("NOT LEGACY\n");
 
 	sqrt_third = sqrt( (double)(1.0/3.0) );
 	r38 = complex_gaussian_rand_no(prn_pt);
@@ -48,6 +79,7 @@ Real sqrt_third;
 	mat_antihermit->m02=complex_gaussian_rand_no(prn_pt);
 	mat_antihermit->m12=complex_gaussian_rand_no(prn_pt);
 
-}/*random_anti_hermitian_*/
+}// random_anti_hermitian_
 
 #endif
+*/

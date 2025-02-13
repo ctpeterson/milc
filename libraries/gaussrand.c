@@ -40,23 +40,34 @@
 //  }
 //}
 
-#ifdef OLD_GAUSSRAND
+//#ifdef OLD_GAUSSRAND
 
 Real gaussian_rand_no( double_prn *prn_pt ){
   static double_prn *ptoggle=NULL;
   static Real gset;
-  Real fac,r,v1,v2;
+  Real fac,r,v1,v2,result;
 
   if  (ptoggle != prn_pt) {
     do {
-      v1=2.0*myrand(prn_pt)-1.0;
-      v2=2.0*myrand(prn_pt)-1.0;
+      v1 = myrand(prn_pt);
+      v2 = myrand(prn_pt);
+      //printf("-----\n");
+      //printf("v1 v2 = %0.17lf %0.17lf\n", v1, v2);
+      v1=2.0*v1-1.0;
+      v2=2.0*v2-1.0;
       r=v1*v1+v2*v2;
     } while (r >= 1.0);
     fac=sqrt( -log((double)r)/(double)r);
     gset=v1*fac;
     ptoggle=prn_pt;
-    return v2*fac;
+    result = v2*fac;
+    //printf("grand = %0.17lf \n", v2);
+    //printf("result 1 = %0.17lf \n",result);
+    fac = sqrt(-2.0*log((double)r)/(double)r);
+    //printf("FAC = %0.17lf \n", fac);
+    //printf("%0.17lf\n",result);
+    //printf("-----\n");
+    return result;
   } else {
     ptoggle=NULL;
     return gset;
@@ -65,12 +76,13 @@ Real gaussian_rand_no( double_prn *prn_pt ){
 
 complex complex_gaussian_rand_no( double_prn *prn_pt ){
   complex result;
-
+  //printf("IN LEGACY");
   result.real = gaussian_rand_no( prn_pt );
   result.imag = gaussian_rand_no( prn_pt );
   return result;
 }
 
+/*
 #else
 
 // don't save state -- makes it really thread save, instead of just for loops
@@ -90,6 +102,7 @@ Real gaussian_rand_no( double_prn *prn_pt ){
 complex complex_gaussian_rand_no( double_prn *prn_pt ){
   Real fac,r,v1,v2;
   complex result;
+  //printf("OUT OF LEGACY");
 
     do {
       v1=2.0*myrand(prn_pt)-1.0;
@@ -103,4 +116,4 @@ complex complex_gaussian_rand_no( double_prn *prn_pt ){
 }
 
 #endif
-
+*/

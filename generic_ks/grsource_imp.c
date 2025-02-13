@@ -38,12 +38,36 @@ register site *s;
 
 /* DEPRECATED VERSION */
 
+static void norm2(su3_vector *vec, double *norm, int parity){
+  register double n ;
+  register site *s;
+  register  int i;
+  
+  n=0 ; 
+  FORSOMEPARITY(i,s,parity){
+    n += magsq_su3vec(&(vec[i]));
+  }
+  *norm = n ;
+  g_doublesum(norm);
+}
+
+void gaussian(field_offset dest, int parity)
+{
+  su3_vector *g_rand = create_v_field();
+  grsource_plain_field(g_rand, parity);
+  copy_site_member_from_v_field(dest, g_rand);
+}
+
 void grsource_imp( field_offset dest, Real mass, int parity,
 		   imp_ferm_links_t *fn ) {
   su3_vector *g_rand = create_v_field();
   su3_vector *tdest = create_v_field();
+  double nrm;
   
   grsource_plain_field( g_rand, EVENANDODD );
+  norm2(g_rand,&nrm,EVENANDODD);
+  printf("NORM AFTER GRAND: %f\n",nrm);
+
   ks_dirac_adj_op( g_rand, tdest, mass, parity, fn );
 
   copy_site_member_from_v_field(dest, tdest);
@@ -61,8 +85,9 @@ void grsource_imp_plus( field_offset dest, field_offset rand, Real mass, int par
 
   su3_vector *g_rand = create_v_field();
   su3_vector *tdest = create_v_field();
-  
+
   grsource_plain_field( g_rand, EVENANDODD );
+
   copy_site_member_from_v_field(rand, g_rand);
 
   ks_dirac_adj_op( g_rand, tdest, mass, parity, fn );
